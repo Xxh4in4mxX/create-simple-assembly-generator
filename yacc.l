@@ -7,6 +7,8 @@
 
 %%
 
+"\n"                        {printf("\nline %d:\n",yylineno++);}
+
 [0-9]+                      {yylval = atoi(yytext);return NUMBER;}
 "int"                       {printf("keyword int\n");}
 "double"                    {printf("keyword double\n");}
@@ -39,3 +41,4 @@
 int yywrap() {return -1;}
 int main() { yyparse(); }
 int yyerror() {printf("parse error\n");}
+int lineno = 1;
