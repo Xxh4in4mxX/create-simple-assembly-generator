@@ -35,16 +35,16 @@
 %%
 statementlist    :   statementlist statement | statement;
 block            :   LCB statementlist RCB;
-conditionE       :   E RELOP E {printf("GT?\n", $2);};
+conditionE       :   E RELOP E {printf("\tGT?\n", $2);};
 RELOP            :   GT|LT|GE|LE|EQ|UE;
-ifstatement      :   IF LP conditionE {printf("jnz L%d\n", iflabel);} RP statement {printf("L%d\n", iflabel++);};
+ifstatement      :   IF LP conditionE {printf("\tjnz L%d\n", iflabel);} RP statement {printf("L%d\n", iflabel++);};
 
-assignstatement  :   ID ASSIGN E SC {printf("POP %c\n", $1);};
+assignstatement  :   ID ASSIGN E SC {printf("\tPOP %c\n", $1);};
 statement        :   assignstatement | ifstatement | block; 
 
-E           :   E ADD E {printf("ADD\n");}|
+E           :   E ADD E {printf("\tADD\n");}|
                 E SUB E|
                 E MUL E|
                 E DIV E|
-                NUMBER {printf("push %d\n", $1);}|
-                ID {printf("push %c\n", $1);};
+                NUMBER {printf("\tpush %d\n", $1);}|
+                ID {printf("\tpush %c\n", $1);};

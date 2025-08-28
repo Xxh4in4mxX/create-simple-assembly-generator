@@ -1374,12 +1374,12 @@ yyreduce:
     {
         case 5:
 #line 38 "yacc.y"
-    {printf("GT?\n", (yyvsp[(2) - (3)]));;}
+    {printf("\tGT?\n", (yyvsp[(2) - (3)]));;}
     break;
 
   case 12:
 #line 40 "yacc.y"
-    {printf("jnz L%d\n", iflabel);;}
+    {printf("\tjnz L%d\n", iflabel);;}
     break;
 
   case 13:
@@ -1389,22 +1389,22 @@ yyreduce:
 
   case 14:
 #line 42 "yacc.y"
-    {printf("POP %c\n", (yyvsp[(1) - (4)]));;}
+    {printf("\tPOP %c\n", (yyvsp[(1) - (4)]));;}
     break;
 
   case 18:
 #line 45 "yacc.y"
-    {printf("ADD\n");;}
+    {printf("\tADD\n");;}
     break;
 
   case 22:
 #line 49 "yacc.y"
-    {printf("push %d\n", (yyvsp[(1) - (1)]));;}
+    {printf("\tpush %d\n", (yyvsp[(1) - (1)]));;}
     break;
 
   case 23:
 #line 50 "yacc.y"
-    {printf("push %c\n", (yyvsp[(1) - (1)]));;}
+    {printf("\tpush %c\n", (yyvsp[(1) - (1)]));;}
     break;
 
 
