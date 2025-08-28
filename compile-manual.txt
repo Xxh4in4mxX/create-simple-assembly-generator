@@ -1,0 +1,3 @@
+bison -d yacc.y
+flex yacc.L
+gcc lex.yy.c yacc.tab.c
