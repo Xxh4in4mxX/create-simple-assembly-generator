@@ -117,11 +117,65 @@
 #line 1 "yacc.y"
 
     #include <stdio.h>
-    int iflabel = 0;
-    int yylex(void);
+    #include <stdlib.h>
+    #include "stack.h"
     void yyerror(const char *s);
     int yyparse(void);
     int yylex();
+    int iflabel = 0;
+    int yylex(void);
+void initializeStack(Stack *s, int init_capacity)
+{
+    s->stack = (int *)malloc(init_capacity * sizeof(int));
+    s->capacity = init_capacity;
+    s->top_element = -1;
+}
+void upsizeStack(Stack *s) {
+    if (s->top_element + 1 == s->capacity) {
+        s->capacity *= 2;
+        s->stack = (int *)realloc(s->stack, s->capacity * sizeof(int));
+        printf("upped, current size %d\n", s->capacity);
+    }
+    else
+        return;
+}
+void downsizeStack(Stack *s) {
+    if (s->top_element + 1 < s->capacity / 2) {
+        s->capacity /= 2;
+        s->stack = (int *)realloc(s->stack, s->capacity * sizeof(int));
+        printf("downed, current size %d\n", s->capacity);
+    } else
+        return;
+}
+void push(Stack *s, int value)
+{
+    upsizeStack(s);
+    s->top_element++;
+    s->stack[s->top_element] = value;
+}
+int pop(Stack *s)
+{
+    downsizeStack(s);
+    if (s->top_element >= 0)
+    {
+        return s->stack[s->top_element--];
+    }
+    else
+    {
+        printf("Stack pop error!\n");
+        exit(1);
+    }
+}
+void freeStack(Stack *s)
+{
+    free(s->stack);
+    s->stack = NULL;
+    s->capacity = 0;
+    s->top_element = -1;
+}
+
+    Stack label_index;
+    Stack *ptr_to_stack = &label_index;
 
 
 /* Enabling traces.  */
@@ -155,7 +209,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 159 "yacc.tab.c"
+#line 213 "yacc.tab.c"
 
 #ifdef short
 # undef short
@@ -437,7 +491,7 @@ static const yytype_int8 yyrhs[] =
       24,     0,    -1,    24,    31,    -1,    31,    -1,     7,    24,
        8,    -1,    32,    27,    32,    -1,    13,    -1,    14,    -1,
       15,    -1,    16,    -1,    17,    -1,    18,    -1,    -1,    19,
-       5,    26,    29,     6,    31,    -1,     3,    21,    32,    22,
+       5,    26,     6,    29,    31,    -1,     3,    21,    32,    22,
       -1,    30,    -1,    28,    -1,    25,    -1,    32,     9,    32,
       -1,    32,    10,    32,    -1,    32,    12,    32,    -1,    32,
       11,    32,    -1,     4,    -1,     3,    -1
@@ -446,9 +500,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    36,    36,    36,    37,    38,    39,    39,    39,    39,
-      39,    39,    40,    40,    42,    43,    43,    43,    45,    46,
-      47,    48,    49,    50
+       0,    90,    90,    90,    91,    92,    93,    93,    93,    93,
+      93,    93,    94,    94,   105,   106,   106,   106,   108,   109,
+     110,   111,   112,   113
 };
 #endif
 
@@ -498,15 +552,15 @@ static const yytype_uint8 yyr2[] =
 static const yytype_uint8 yydefact[] =
 {
        0,     0,     0,     0,     0,    17,    16,    15,     3,     0,
-       0,     0,     1,     2,    23,    22,     0,     4,    12,     0,
-       0,     0,     0,     0,    14,     0,     6,     7,     8,     9,
+       0,     0,     1,     2,    23,    22,     0,     4,     0,     0,
+       0,     0,     0,     0,    14,    12,     6,     7,     8,     9,
       10,    11,     0,    18,    19,    21,    20,     0,     5,    13
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     4,     5,    18,    32,     6,    25,     7,     8,    16
+      -1,     4,     5,    18,    32,     6,    37,     7,     8,    16
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -515,8 +569,8 @@ static const yytype_int8 yydefgoto[] =
 static const yytype_int8 yypact[] =
 {
       11,   -17,    11,    15,     2,   -18,   -18,   -18,   -18,    24,
-       0,    24,   -18,   -18,   -18,   -18,    14,   -18,   -18,    28,
-      24,    24,    24,    24,   -18,    23,   -18,   -18,   -18,   -18,
+       0,    24,   -18,   -18,   -18,   -18,    14,   -18,    23,    28,
+      24,    24,    24,    24,   -18,   -18,   -18,   -18,   -18,   -18,
      -18,   -18,    24,     5,    20,    22,   -18,    11,    38,   -18
 };
 
@@ -535,7 +589,7 @@ static const yytype_uint8 yytable[] =
 {
       13,    19,    12,     1,     9,     1,    13,     2,    17,     2,
       33,    34,    35,    36,     1,    21,    22,    23,     2,     3,
-      11,     3,    38,    20,    21,    22,    23,    14,    15,    37,
+      11,     3,    38,    20,    21,    22,    23,    14,    15,    25,
        3,    22,    23,    39,    23,    10,    24,    20,    21,    22,
       23,    26,    27,    28,    29,    30,    31,    20,    21,    22,
       23
@@ -557,8 +611,8 @@ static const yytype_uint8 yystos[] =
 {
        0,     3,     7,    19,    24,    25,    28,    30,    31,    21,
       24,     5,     0,    31,     3,     4,    32,     8,    26,    32,
-       9,    10,    11,    12,    22,    29,    13,    14,    15,    16,
-      17,    18,    27,    32,    32,    32,    32,     6,    32,    31
+       9,    10,    11,    12,    22,     6,    13,    14,    15,    16,
+      17,    18,    27,    32,    32,    32,    32,    29,    32,    31
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1373,43 +1427,51 @@ yyreduce:
   switch (yyn)
     {
         case 5:
-#line 38 "yacc.y"
+#line 92 "yacc.y"
     {printf("\tGT?\n", (yyvsp[(2) - (3)]));;}
     break;
 
   case 12:
-#line 40 "yacc.y"
-    {printf("\tjnz L%d\n", iflabel);;}
+#line 94 "yacc.y"
+    {
+    
+    
+    initializeStack(ptr_to_stack, 5);
+    push(ptr_to_stack, ++iflabel);
+    printf("\tjnz ENDIF%d\n", iflabel);
+    ;}
     break;
 
   case 13:
-#line 40 "yacc.y"
-    {printf("L%d\n", iflabel++);;}
+#line 101 "yacc.y"
+    {
+        printf("ENDIF%d\n", pop(ptr_to_stack));
+    ;}
     break;
 
   case 14:
-#line 42 "yacc.y"
+#line 105 "yacc.y"
     {printf("\tPOP %c\n", (yyvsp[(1) - (4)]));;}
     break;
 
   case 18:
-#line 45 "yacc.y"
+#line 108 "yacc.y"
     {printf("\tADD\n");;}
     break;
 
   case 22:
-#line 49 "yacc.y"
+#line 112 "yacc.y"
     {printf("\tpush %d\n", (yyvsp[(1) - (1)]));;}
     break;
 
   case 23:
-#line 50 "yacc.y"
+#line 113 "yacc.y"
     {printf("\tpush %c\n", (yyvsp[(1) - (1)]));;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1413 "yacc.tab.c"
+#line 1475 "yacc.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
