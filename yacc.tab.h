@@ -56,9 +56,10 @@
      EQ = 272,
      UE = 273,
      IF = 274,
-     WHILE = 275,
-     ASSIGN = 276,
-     SC = 277
+     ELSE = 275,
+     WHILE = 276,
+     ASSIGN = 277,
+     SC = 278
    };
 #endif
 /* Tokens.  */
@@ -79,9 +80,10 @@
 #define EQ 272
 #define UE 273
 #define IF 274
-#define WHILE 275
-#define ASSIGN 276
-#define SC 277
+#define ELSE 275
+#define WHILE 276
+#define ASSIGN 277
+#define SC 278
 
 
 

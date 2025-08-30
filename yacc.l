@@ -7,8 +7,8 @@
 
 %%
 
-"\n"                        {printf("\nline %d:\n",yylineno++);}
 
+[ \t\r]+                    {}
 [0-9]+                      {yylval = atoi(yytext);return NUMBER;}
 "int"                       {printf("keyword int\n");}
 "double"                    {printf("keyword double\n");}
@@ -36,6 +36,8 @@
 ")"                         {return RP;}
 "{"                         {return LCB;}
 "}"                         {return RCB;}
+
+.                           {printf("Unknown char: %s\n", yytext);}
 
 %%
 int yywrap() {return -1;}

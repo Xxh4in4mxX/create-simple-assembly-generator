@@ -1,64 +1,54 @@
 %{
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include "stack.h"
-    void yyerror(const char *s);
-    int yyparse(void);
-    int yylex();
-    int iflabel = 0;
-    int yylex(void);
-void initializeStack(Stack *s, int init_capacity)
-{
-    s->stack = (int *)malloc(init_capacity * sizeof(int));
-    s->capacity = init_capacity;
-    s->top_element = -1;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include "stack.h"
+#define MAX_STACK 100
+void yyerror(const char *s);
+int yyparse(void);
+int yylex();
+int yylex(void);
+int labelCount = 0;
+char* labelStack[MAX_STACK];
+int top = -1;
+char* newLabel() {
+    char *buf = malloc(10);
+    sprintf(buf, "L%1d", labelCount++);
+    return buf;
 }
-void upsizeStack(Stack *s) {
-    if (s->top_element + 1 == s->capacity) {
-        s->capacity *= 2;
-        s->stack = (int *)realloc(s->stack, s->capacity * sizeof(int));
-        printf("upped, current size %d\n", s->capacity);
-    }
-    else
-        return;
-}
-void downsizeStack(Stack *s) {
-    if (s->top_element + 1 < s->capacity / 2) {
-        s->capacity /= 2;
-        s->stack = (int *)realloc(s->stack, s->capacity * sizeof(int));
-        printf("downed, current size %d\n", s->capacity);
-    } else
-        return;
-}
-void push(Stack *s, int value)
-{
-    upsizeStack(s);
-    s->top_element++;
-    s->stack[s->top_element] = value;
-}
-int pop(Stack *s)
-{
-    downsizeStack(s);
-    if (s->top_element >= 0)
-    {
-        return s->stack[s->top_element--];
-    }
-    else
-    {
-        printf("Stack pop error!\n");
+void pushLabel(char *label) {
+    if (top >= MAX_STACK - 1) {
+        printf("Stack overflow\n");
         exit(1);
     }
+    labelStack[++top] = label;
 }
-void freeStack(Stack *s)
-{
-    free(s->stack);
-    s->stack = NULL;
-    s->capacity = 0;
-    s->top_element = -1;
+char* popLabel() {
+    if (top < 0) {
+        printf("Stack underflow\n");
+        exit(1);
+    }
+    return labelStack[top--];
 }
 
-    Stack label_index;
-    Stack *ptr_to_stack = &label_index;
+int indentLevel = 0;
+void emit(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int isLabel = 0;
+    size_t len = strlen(fmt);
+    if (len > 0 && fmt[len-1] == ':') isLabel = 1;
+    else if (len > 2 && fmt[len-2] == ':' && fmt[len-1] == '\n') {
+        isLabel = 1;
+    }
+    if (!isLabel) {
+        printf("\t");
+    }
+    vprintf(fmt, args);
+    va_end(args);
+}
+
 %}
 
 
@@ -82,6 +72,7 @@ void freeStack(Stack *s)
 %token UE
 
 %token IF
+%token ELSE
 %token WHILE
 %right ASSIGN
 %right SC
@@ -89,25 +80,22 @@ void freeStack(Stack *s)
 %%
 statementlist    :   statementlist statement | statement;
 block            :   LCB statementlist RCB;
-conditionE       :   E RELOP E {printf("\tGT?\n", $2);};
+conditionE       :   E RELOP E {emit("GT?\n");};
 RELOP            :   GT|LT|GE|LE|EQ|UE;
 ifstatement      :   IF LP conditionE RP {
-    
-    
-    initializeStack(ptr_to_stack, 5);
-    push(ptr_to_stack, ++iflabel);
-    printf("\tjnz ENDIF%d\n", iflabel);
-    }
-    statement {
-        printf("ENDIF%d\n", pop(ptr_to_stack));
+    char *Lend = newLabel();
+    pushLabel(Lend);
+    emit("jnz %s\n", Lend);
+    } statement {
+        emit("%s:", popLabel());
     };
 
-assignstatement  :   ID ASSIGN E SC {printf("\tPOP %c\n", $1);};
+assignstatement  :   ID ASSIGN E SC {emit("pop %c\n", $1);};
 statement        :   assignstatement | ifstatement | block; 
 
-E           :   E ADD E {printf("\tADD\n");}|
+E           :   E ADD E {emit("add\n");}|
                 E SUB E|
                 E MUL E|
                 E DIV E|
-                NUMBER {printf("\tpush %d\n", $1);}|
-                ID {printf("\tpush %c\n", $1);};
+                NUMBER {emit("push %d\n", $1);}|
+                ID {emit("push %c\n", $1);};
