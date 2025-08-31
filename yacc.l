@@ -15,7 +15,9 @@
 "void"                      {printf("keyword void\n");}
 "for"                       {printf("keyword for\n");}
 "if"                        {return IF;}
+"else"                      {return ELSE;}
 "while"                     {return WHILE;}
+"do"                        {return DO;}
 
 [A-z_][A-z0-9_]*            {yylval = yytext[0]; return ID;}
 "+"                         {return ADD;}

@@ -74,24 +74,50 @@ void emit(const char *fmt, ...) {
 %token IF
 %token ELSE
 %token WHILE
+%token DO
 %right ASSIGN
 %right SC
 
 %%
 statementlist    :   statementlist statement | statement;
 block            :   LCB statementlist RCB;
-conditionE       :   E RELOP E {emit("GT?\n");};
-RELOP            :   GT|LT|GE|LE|EQ|UE;
-ifstatement      :   IF LP conditionE RP {
-    char *Lend = newLabel();
-    pushLabel(Lend);
-    emit("jnz %s\n", Lend);
+conditionE       :   E relop E {emit("GT?\n");};
+relop            :   GT|LT|GE|LE|EQ|UE;
+compareop         :    LP conditionE RP {
+    char *Lelse = newLabel();
+    pushLabel(Lelse);
+    emit("jnz %s\n", Lelse);
+    };
+ifstatement      :   IF compareop statement ELSE {
+        char *Lend = newLabel();
+        emit("jmp %s\n", Lend);
+        emit("%s:\n", popLabel());
+        pushLabel(Lend);
     } statement {
         emit("%s:", popLabel());
+    } | IF compareop statement {
+        emit("%s:\n", popLabel());
     };
+whilestatement  :   DO statement WHILE {
+    char *Lbegin = newLabel();
+    emit("%s:\n", Lbegin);
+    pushLabel(Lbegin);
+} compareop statement {
+    char *end = popLabel();
+    emit("jmp %s\n", popLabel());
+    emit("%s:\n", end);
+} | WHILE {
+    char *Lbegin = newLabel();
+    emit("%s:\n", Lbegin);
+    pushLabel(Lbegin);
+} compareop statement {
+    char *end = popLabel();
+    emit("jmp %s\n", popLabel());
+    emit("%s:\n", end);
+}
 
 assignstatement  :   ID ASSIGN E SC {emit("pop %c\n", $1);};
-statement        :   assignstatement | ifstatement | block; 
+statement        :   assignstatement | ifstatement | whilestatement | block; 
 
 E           :   E ADD E {emit("add\n");}|
                 E SUB E|
