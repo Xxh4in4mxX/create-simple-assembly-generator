@@ -68,8 +68,8 @@ void emit(const char *fmt, ...) {
 %token <ival>   NUMBER
 %token <sval>   GT LT GE LE EQ UE
 
-%token DO IF ELSE WHILE
-%token LP RP LCB RCB
+%token DO IF ELSE WHILE FOR
+%token LP RP LCB RCB CM
 %token ADD SUB MUL DIV
 %token ASSIGN SC
 
@@ -148,9 +148,33 @@ whilestatement
           emit("%s:\n", end);
       }
     ;
+forassign
+    : ID ASSIGN E { emit("pop %s\n", $1); free($1); }
+    ;
+forstmts
+    : forassign
+    ;
+forstmtslist
+    : forstmts CM forstmtslist
+    | forstmts
+    ;
+forstatement
+    : FOR LP assignstatement {
+        char *Fbegin = newLabel();
+        emit("%s:\n", Fbegin);
+        pushLabel(Fbegin);
+    } conditionE {
+        char *Fout = newLabel();
+        emit("jnz %s\n", Fout);
+        pushLabel(Fout);
+    } SC forstmtslist RP statement {
+        char *Fout = popLabel();
+        emit("jmp %s\n", popLabel());
+        emit("%s:\n", Fout);
+    }; 
 
 assignstatement
-    : ID ASSIGN E SC { emit("pop %s\n", $1); }
+    : ID ASSIGN E SC { emit("pop %s\n", $1); free($1); }
     ;
 
 statement
@@ -158,7 +182,10 @@ statement
     | ifstatement
     | whilestatement
     | block
+    | forstatement
     ;
+
+
 
 E
     : E ADD E { emit("add\n"); }

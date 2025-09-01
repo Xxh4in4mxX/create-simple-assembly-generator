@@ -13,13 +13,14 @@
 "int"                       {printf("keyword int\n");}
 "double"                    {printf("keyword double\n");}
 "void"                      {printf("keyword void\n");}
-"for"                       {printf("keyword for\n");}
+"for"                       {return FOR;}
 "if"                        {return IF;}
 "else"                      {return ELSE;}
 "while"                     {return WHILE;}
 "do"                        {return DO;}
 
-[A-z_][A-z0-9_]*            {yylval.sval = yytext; return ID;}
+[A-Za-z_][0-9A-Za-z_]*            {yylval.sval = strdup(yytext); return ID;}
+
 "+"                         {return ADD;}
 "-"                         {return SUB;}
 "/"                         {return DIV;}
@@ -34,6 +35,7 @@
 "!="    { yylval.sval = strdup("UE?"); return UE; }
 
 ";"                         {return SC;}
+","                         {return CM;}
 "("                         {return LP;}
 ")"                         {return RP;}
 "{"                         {return LCB;}
