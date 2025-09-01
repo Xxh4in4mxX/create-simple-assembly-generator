@@ -478,7 +478,7 @@ char *yytext;
 #line 1 "yacc.l"
 #line 2 "yacc.l"
     #include "yacc.tab.h"
-    extern int yylval;
+    // extern int yylval;
     int yyparse(void);
 #line 483 "lex.yy.c"
 #line 484 "lex.yy.c"
@@ -767,7 +767,7 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 #line 12 "yacc.l"
-{yylval = atoi(yytext);return NUMBER;}
+{yylval.ival = atoi(yytext);return NUMBER;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
@@ -812,7 +812,7 @@ YY_RULE_SETUP
 case 11:
 YY_RULE_SETUP
 #line 22 "yacc.l"
-{yylval = yytext[0]; return ID;}
+{yylval.sval = yytext; return ID;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
@@ -842,32 +842,32 @@ YY_RULE_SETUP
 case 17:
 YY_RULE_SETUP
 #line 29 "yacc.l"
-{return GT;}
+{ yylval.sval = strdup("GT?"); return GT; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 30 "yacc.l"
-{return LT;}
+{ yylval.sval = strdup("LT?"); return LT; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 31 "yacc.l"
-{return GE;}
+{ yylval.sval = strdup("GE?"); return GE; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 32 "yacc.l"
-{return LE;}
+{ yylval.sval = strdup("LE?"); return LE; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 33 "yacc.l"
-{return EQ;}
+{ yylval.sval = strdup("EQ?"); return EQ; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 34 "yacc.l"
-{return UE;}
+{ yylval.sval = strdup("UE?"); return UE; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP

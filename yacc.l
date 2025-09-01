@@ -1,6 +1,6 @@
 %{
     #include "yacc.tab.h"
-    extern int yylval;
+    // extern int yylval;
     int yyparse(void);
 %}
 
@@ -9,7 +9,7 @@
 
 
 [ \t\r]+                    {}
-[0-9]+                      {yylval = atoi(yytext);return NUMBER;}
+[0-9]+                      {yylval.ival = atoi(yytext);return NUMBER;}
 "int"                       {printf("keyword int\n");}
 "double"                    {printf("keyword double\n");}
 "void"                      {printf("keyword void\n");}
@@ -19,19 +19,19 @@
 "while"                     {return WHILE;}
 "do"                        {return DO;}
 
-[A-z_][A-z0-9_]*            {yylval = yytext[0]; return ID;}
+[A-z_][A-z0-9_]*            {yylval.sval = yytext; return ID;}
 "+"                         {return ADD;}
 "-"                         {return SUB;}
 "/"                         {return DIV;}
 "*"                         {return MUL;}
 "="                         {return ASSIGN;}
 
-">"                         {return GT;}
-"<"                         {return LT;}
-">="                        {return GE;}
-"<="                        {return LE;}
-"=="                        {return EQ;}
-"!="                        {return UE;}
+">"     { yylval.sval = strdup("GT?"); return GT; }
+"<"     { yylval.sval = strdup("LT?"); return LT; }
+">="    { yylval.sval = strdup("GE?"); return GE; }
+"<="    { yylval.sval = strdup("LE?"); return LE; }
+"=="    { yylval.sval = strdup("EQ?"); return EQ; }
+"!="    { yylval.sval = strdup("UE?"); return UE; }
 
 ";"                         {return SC;}
 "("                         {return LP;}

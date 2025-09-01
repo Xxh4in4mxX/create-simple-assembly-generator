@@ -41,24 +41,24 @@
    enum yytokentype {
      ID = 258,
      NUMBER = 259,
-     LP = 260,
-     RP = 261,
-     LCB = 262,
-     RCB = 263,
-     ADD = 264,
-     SUB = 265,
-     DIV = 266,
-     MUL = 267,
-     GT = 268,
-     LT = 269,
-     GE = 270,
-     LE = 271,
-     EQ = 272,
-     UE = 273,
-     DO = 274,
-     IF = 275,
-     ELSE = 276,
-     WHILE = 277,
+     GT = 260,
+     LT = 261,
+     GE = 262,
+     LE = 263,
+     EQ = 264,
+     UE = 265,
+     DO = 266,
+     IF = 267,
+     ELSE = 268,
+     WHILE = 269,
+     LP = 270,
+     RP = 271,
+     LCB = 272,
+     RCB = 273,
+     ADD = 274,
+     SUB = 275,
+     MUL = 276,
+     DIV = 277,
      ASSIGN = 278,
      SC = 279
    };
@@ -66,24 +66,24 @@
 /* Tokens.  */
 #define ID 258
 #define NUMBER 259
-#define LP 260
-#define RP 261
-#define LCB 262
-#define RCB 263
-#define ADD 264
-#define SUB 265
-#define DIV 266
-#define MUL 267
-#define GT 268
-#define LT 269
-#define GE 270
-#define LE 271
-#define EQ 272
-#define UE 273
-#define DO 274
-#define IF 275
-#define ELSE 276
-#define WHILE 277
+#define GT 260
+#define LT 261
+#define GE 262
+#define LE 263
+#define EQ 264
+#define UE 265
+#define DO 266
+#define IF 267
+#define ELSE 268
+#define WHILE 269
+#define LP 270
+#define RP 271
+#define LCB 272
+#define RCB 273
+#define ADD 274
+#define SUB 275
+#define MUL 276
+#define DIV 277
 #define ASSIGN 278
 #define SC 279
 
@@ -91,7 +91,16 @@
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+#line 58 "yacc.y"
+{
+    int ival;     /* for NUMBER */
+    char id;      /* for ID (single char variable name) */
+    char *sval;   /* for operator strings like "GT?", "LT?" */
+}
+/* Line 1529 of yacc.c.  */
+#line 103 "yacc.tab.h"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
