@@ -55,11 +55,12 @@
      LE = 271,
      EQ = 272,
      UE = 273,
-     IF = 274,
-     ELSE = 275,
-     WHILE = 276,
-     ASSIGN = 277,
-     SC = 278
+     DO = 274,
+     IF = 275,
+     ELSE = 276,
+     WHILE = 277,
+     ASSIGN = 278,
+     SC = 279
    };
 #endif
 /* Tokens.  */
@@ -79,11 +80,12 @@
 #define LE 271
 #define EQ 272
 #define UE 273
-#define IF 274
-#define ELSE 275
-#define WHILE 276
-#define ASSIGN 277
-#define SC 278
+#define DO 274
+#define IF 275
+#define ELSE 276
+#define WHILE 277
+#define ASSIGN 278
+#define SC 279
 
 
 

@@ -51,7 +51,6 @@ void emit(const char *fmt, ...) {
 
 %}
 
-
 %token ID
 %token NUMBER
 %left LP
@@ -71,10 +70,10 @@ void emit(const char *fmt, ...) {
 %token EQ
 %token UE
 
+%token DO
 %token IF
 %token ELSE
 %token WHILE
-%token DO
 %right ASSIGN
 %right SC
 
@@ -98,7 +97,7 @@ ifstatement      :   IF compareop statement ELSE {
     } | IF compareop statement {
         emit("%s:\n", popLabel());
     };
-whilestatement  :   DO statement WHILE {
+whilestatement  :   WHILE {
     char *Lbegin = newLabel();
     emit("%s:\n", Lbegin);
     pushLabel(Lbegin);
@@ -106,11 +105,11 @@ whilestatement  :   DO statement WHILE {
     char *end = popLabel();
     emit("jmp %s\n", popLabel());
     emit("%s:\n", end);
-} | WHILE {
+} | DO {
     char *Lbegin = newLabel();
     emit("%s:\n", Lbegin);
     pushLabel(Lbegin);
-} compareop statement {
+} statement WHILE compareop SC {
     char *end = popLabel();
     emit("jmp %s\n", popLabel());
     emit("%s:\n", end);
