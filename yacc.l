@@ -8,7 +8,7 @@
 %%
 
 
-[ \t\r]+                    {}
+[ \n\t\r]+                    {}
 [0-9]+                      {yylval.ival = atoi(yytext);return NUMBER;}
 "int"                       {printf("keyword int\n");}
 "double"                    {printf("keyword double\n");}
@@ -18,6 +18,10 @@
 "else"                      {return ELSE;}
 "while"                     {return WHILE;}
 "do"                        {return DO;}
+"break"                     {return BREAK;}
+"continue"                  {return CONTINUE;}
+"switch"                    {return SWITCH;}
+"case"                      {return CASE;}
 
 [A-Za-z_][0-9A-Za-z_]*            {yylval.sval = strdup(yytext); return ID;}
 

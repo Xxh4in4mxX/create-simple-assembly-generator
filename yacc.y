@@ -14,30 +14,94 @@ int yylex(void);
 
 /* Label management */
 int labelCount = 0;
-char* labelStack[MAX_STACK];
-int top = -1;
+char* b_c_stack[MAX_STACK];
+int b_c_bot = -1;
+int b_c_heapTop = MAX_STACK;
+void storeContinueToStack(char *label) {
+    if (b_c_bot >= MAX_STACK / 2) {
+        // printf("Stack overflow\n");
+        exit(1);
+    }
+    b_c_stack[++b_c_bot] = label;
+    // printf("label %s moved to %d\n", label, b_c_bot);
+}
+void storeBreakToHeap(char *label) {
+    if (b_c_heapTop <= MAX_STACK / 2 - 1) {
+        // printf("Heap overflow\n");
+        exit(1);
+    }
+    b_c_stack[--b_c_heapTop] = label;
+    // printf("label %s moved to %d\n", label, b_c_heapTop);
+}
+char* b_c_popStored(int getEnd) {
+    if (getEnd == 1) {
+        if (b_c_heapTop >= MAX_STACK) {
+            // printf("Heap underflow\n");
+            exit(1);
+        }
+        // printf("get element from slot %d\n", b_c_heapTop);
+        return b_c_stack[b_c_heapTop++];
+    } else {
+        if (b_c_bot < 0) {
+            // printf("Stack underflow\n");
+            exit(1);
+        }
+        // printf("get element from slot %d\n", b_c_bot);
+        return b_c_stack[b_c_bot--];
+    }
+}
+
+/* Head and End management */
+char* storedStack[MAX_STACK];
+int bot = -1;
+int heapTop = MAX_STACK;
+void storeStartToStack(char *label) {
+    if (bot >= MAX_STACK / 2) {
+        // printf("Stack overflow\n");
+        exit(1);
+    }
+    storedStack[++bot] = label;
+    // printf("label %s moved to %d\n", label, bot);
+}
+void storeEndToHeap(char *label) {
+    if (heapTop <= MAX_STACK / 2 - 1) {
+        // printf("Heap overflow\n");
+        exit(1);
+    }
+    storedStack[--heapTop] = label;
+    // printf("label %s moved to %d\n", label, heapTop);
+}
+char* popStored(int getEnd) {
+    if (getEnd == 1) {
+        if (heapTop >= MAX_STACK) {
+            // printf("Heap underflow\n");
+            exit(1);
+        }
+        // printf("get element from slot %d\n", heapTop);
+        return storedStack[heapTop++];
+    } else {
+        if (bot < 0) {
+            // printf("Stack underflow\n");
+            exit(1);
+        }
+        // printf("get element from slot %d\n", bot);
+        return storedStack[bot--];
+    }
+}
+char* peekHeap() {return storedStack[heapTop];}
+char* peekStack() {return storedStack[bot];}
+char* b_c_peekHeap() {return b_c_stack[b_c_heapTop];}
+char* b_c_peekStack() {return b_c_stack[b_c_bot];}
 
 char* newLabel() {
     char *buf = malloc(10);
     sprintf(buf, "L%d", labelCount++);
     return buf;
 }
-void pushLabel(char *label) {
-    if (top >= MAX_STACK - 1) {
-        printf("Stack overflow\n");
-        exit(1);
-    }
-    labelStack[++top] = label;
-}
-char* popLabel() {
-    if (top < 0) {
-        printf("Stack underflow\n");
-        exit(1);
-    }
-    return labelStack[top--];
-}
-
-/* formatting & white-space pruning */
+/*
+emit関数はgptくんに任せました
+出力を整える役割です
+*/
 void emit(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
@@ -68,7 +132,9 @@ void emit(const char *fmt, ...) {
 %token <ival>   NUMBER
 %token <sval>   GT LT GE LE EQ UE
 
-%token DO IF ELSE WHILE FOR
+%token DO IF WHILE FOR CONTINUE BREAK SWITCH CASE
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 %token LP RP LCB RCB CM
 %token ADD SUB MUL DIV
 %token ASSIGN SC
@@ -83,16 +149,13 @@ void emit(const char *fmt, ...) {
 %type <sval> relop
 
 %%
-
 statementlist
     : statementlist statement
     | statement
     ;
-
 block
     : LCB statementlist RCB
     ;
-
 conditionE
     : E relop E { emit("%s\n", $2); }
     ;
@@ -107,45 +170,63 @@ relop
     ;
 
 compareop
-    : LP conditionE RP {
-          char *Lelse = newLabel();
-          pushLabel(Lelse);
-          emit("jnz %s\n", Lelse);
+    : LP conditionE RP  {
+          char *L = peekHeap();
+          emit("jnz %s\n", L);
       }
+    ;
+ifheader
+    : IF {
+          char *L = newLabel();
+          storeEndToHeap(L);
+      } compareop
     ;
 
 ifstatement
-    : IF compareop statement ELSE {
+    : ifheader statement %prec LOWER_THAN_ELSE {
+          char *Lend = popStored(1);
+          emit("%s:\n", Lend); /* Lelse */
+      }
+    | ifheader /* peekHeap(); jnz(Lelse)*/ statement ELSE {
+          char *Lelse = popStored(1);
           char *Lend = newLabel();
-          emit("jmp %s\n", Lend);
-          emit("%s:\n", popLabel()); /* Lelse */
-          pushLabel(Lend);
+          emit("jmp %s\n", Lend); /* jmp Lend */
+          emit("%s:\n", Lelse); /* Lelse: */
+          storeEndToHeap(Lend);
       } statement {
-          emit("%s:\n", popLabel()); /* Lend */
-      }
-    | IF compareop statement {
-          emit("%s:\n", popLabel()); /* Lelse */
-      }
+          char *Lend = popStored(1);
+          emit("%s:\n", Lend); /* Lend */
+      } 
     ;
 
 whilestatement
     : WHILE {
           char *Lbegin = newLabel();
+          char *Lend = newLabel();
           emit("%s:\n", Lbegin);
-          pushLabel(Lbegin);
+          storeStartToStack(Lbegin);
+          storeEndToHeap(Lend);
+          storeContinueToStack(Lbegin);
+          storeBreakToHeap(Lend);
       } compareop statement {
-          char *end = popLabel();     /* Lelse */
-          emit("jmp %s\n", popLabel()); /* Lbegin */
-          emit("%s:\n", end);
+          char *Lbegin = b_c_popStored(0);
+          char *Lend = b_c_popStored(1);     /* Lelse */
+          emit("jmp %s\n", Lbegin); /* Lbegin */
+          emit("%s:\n", Lend);
       }
     | DO {
           char *Lbegin = newLabel();
+          char *Lend = newLabel();
           emit("%s:\n", Lbegin);
-          pushLabel(Lbegin);
+          storeStartToStack(Lbegin);
+          storeEndToHeap(Lend);
+          storeContinueToStack(Lbegin);
+          storeBreakToHeap(Lend);
       } statement WHILE compareop SC {
-          char *end = popLabel();     /* Lelse */
-          emit("jmp %s\n", popLabel()); /* Lbegin */
-          emit("%s:\n", end);
+          char *Lend = b_c_popStored(1);     /* Lend */
+          char *Lbegin = b_c_popStored(0);  /* Lbegin */
+          emit("jmp %s\n", Lbegin); /*jmp Lbegin */
+          emit("%s:\n", Lend);
       }
     ;
 forassign
@@ -161,31 +242,40 @@ forstmtslist
 forstatement
     : FOR LP assignstatement {
         char *Fbegin = newLabel();
+        char *Fend = newLabel();
         emit("%s:\n", Fbegin);
-        pushLabel(Fbegin);
+        storeEndToHeap(Fend);
+        storeStartToStack(Fbegin);
+        storeContinueToStack(Fbegin);
+        storeBreakToHeap(Fend);
     } conditionE {
-        char *Fout = newLabel();
-        emit("jnz %s\n", Fout);
-        pushLabel(Fout);
+        char *Fend = peekHeap();
+        emit("jnz %s\n", Fend);
     } SC forstmtslist RP statement {
-        char *Fout = popLabel();
-        emit("jmp %s\n", popLabel());
-        emit("%s:\n", Fout);
-    }; 
+        char *Fend = popStored(1);
+        char *Fbegin = popStored(0);
+        emit("jmp %s\n", Fbegin);
+        emit("%s:\n", Fend);
+    };
 
 assignstatement
     : ID ASSIGN E SC { emit("pop %s\n", $1); free($1); }
     ;
-
+continuestatement
+    : CONTINUE SC {emit("jmp %s\n", b_c_peekStack());}
+    ;
+breakstatement
+    : BREAK SC {emit("jmp %s\n", b_c_peekHeap());}
+    ;
 statement
     : assignstatement
     | ifstatement
     | whilestatement
     | block
     | forstatement
+    | breakstatement
+    | continuestatement
     ;
-
-
 
 E
     : E ADD E { emit("add\n"); }
@@ -195,6 +285,4 @@ E
     | NUMBER  { emit("push %d\n", $1); }
     | ID      { emit("push %s\n", $1); }
     ;
-
 %%
-
