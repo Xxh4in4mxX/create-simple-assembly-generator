@@ -7,9 +7,9 @@
 
 %%
 
-
 [ \n\t\r]+                    {}
 [0-9]+                      {yylval.ival = atoi(yytext);return NUMBER;}
+[0-9]+\.[0-9]+([eE][-+]?[0-9]+)? {yylval.fval = atof(yytext);return FLOAT;}
 "int"                       {printf("keyword int\n");}
 "double"                    {printf("keyword double\n");}
 "void"                      {printf("keyword void\n");}
@@ -39,6 +39,7 @@
 "!="    { yylval.sval = strdup("UE?"); return UE; }
 
 ";"                         {return SC;}
+":"                         {return COLON;}
 ","                         {return CM;}
 "("                         {return LP;}
 ")"                         {return RP;}

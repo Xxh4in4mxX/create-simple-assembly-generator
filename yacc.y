@@ -57,34 +57,34 @@ int bot = -1;
 int heapTop = MAX_STACK;
 void storeStartToStack(char *label) {
     if (bot >= MAX_STACK / 2) {
-        // printf("Stack overflow\n");
+        printf("Stack overflow\n");
         exit(1);
     }
     storedStack[++bot] = label;
-    // printf("label %s moved to %d\n", label, bot);
+    printf("label %s moved to %d\n", label, bot);
 }
 void storeEndToHeap(char *label) {
     if (heapTop <= MAX_STACK / 2 - 1) {
-        // printf("Heap overflow\n");
+        printf("Heap overflow\n");
         exit(1);
     }
     storedStack[--heapTop] = label;
-    // printf("label %s moved to %d\n", label, heapTop);
+    printf("label %s moved to %d\n", label, heapTop);
 }
 char* popStored(int getEnd) {
     if (getEnd == 1) {
         if (heapTop >= MAX_STACK) {
-            // printf("Heap underflow\n");
+            printf("Heap underflow\n");
             exit(1);
         }
-        // printf("get element from slot %d\n", heapTop);
+        printf("get element from slot %d\n", heapTop);
         return storedStack[heapTop++];
     } else {
         if (bot < 0) {
-            // printf("Stack underflow\n");
+            printf("Stack underflow\n");
             exit(1);
         }
-        // printf("get element from slot %d\n", bot);
+        printf("get element from slot %d\n", bot);
         return storedStack[bot--];
     }
 }
@@ -121,6 +121,7 @@ void emit(const char *fmt, ...) {
 /* ---------- Semantic values ---------- */
 %union {
     int ival;     /* for NUMBER */
+    float fval;    /* for FLOAT */
     char id;      /* for ID (single char variable name) */
     char *sval;   /* for operator strings like "GT?", "LT?" */
 }
@@ -130,9 +131,10 @@ void emit(const char *fmt, ...) {
 
 %token <sval>   ID
 %token <ival>   NUMBER
+%token <fval>   FLOAT
 %token <sval>   GT LT GE LE EQ UE
 
-%token DO IF WHILE FOR CONTINUE BREAK SWITCH CASE
+%token DO IF WHILE FOR CONTINUE BREAK SWITCH CASE DEFAULT COLON
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 %token LP RP LCB RCB CM
@@ -275,8 +277,39 @@ statement
     | forstatement
     | breakstatement
     | continuestatement
+    | switchstatement
     ;
-
+switchstatement
+    : SWITCH LP ID RP {
+        char *Lend = newLabel();
+        storeEndToHeap(Lend);
+        storeBreakToHeap(Lend);
+        emit("push %s\n", $3);
+        free($3);
+    } LCB caselist optdefault RCB {
+        char *Lend = b_c_popStored(1);
+        emit("%s:\n", Lend);
+    }
+    ;
+caselist
+    : caselist caseclause
+    | caseclause
+    ;
+caseclause
+    : CASE NUMBER COLON {
+        char *Lcase = newLabel();
+        emit("push %d\n", $2);
+        emit("EQ?\n");
+        emit("jz %s\n", Lcase);
+        emit("%s:\n", Lcase);
+    } statementlist 
+    ;
+optdefault
+    : DEFAULT COLON {
+        char *Ldefault = newLabel();
+        emit("%s:\n", Ldefault);
+    } statementlist
+    ;
 E
     : E ADD E { emit("add\n"); }
     | E SUB E { emit("sub\n"); }
