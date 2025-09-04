@@ -22,6 +22,7 @@
 "continue"                  {return CONTINUE;}
 "switch"                    {return SWITCH;}
 "case"                      {return CASE;}
+"default"                   {return DEFAULT;}
 
 [A-Za-z_][0-9A-Za-z_]*            {yylval.sval = strdup(yytext); return ID;}
 

@@ -11,7 +11,7 @@
 void yyerror(const char *s);
 int yyparse(void);
 int yylex(void);
-
+int debugMode = 0;
 /* Label management */
 int labelCount = 0;
 char* b_c_stack[MAX_STACK];
@@ -19,34 +19,34 @@ int b_c_bot = -1;
 int b_c_heapTop = MAX_STACK;
 void storeContinueToStack(char *label) {
     if (b_c_bot >= MAX_STACK / 2) {
-        // printf("Stack overflow\n");
+        printf("b_c Stack overflow\n");
         exit(1);
     }
     b_c_stack[++b_c_bot] = label;
-    // printf("label %s moved to %d\n", label, b_c_bot);
+    if (debugMode == 1) printf("label %s moved to b_c_stack [%d]\n", label, b_c_bot);
 }
 void storeBreakToHeap(char *label) {
     if (b_c_heapTop <= MAX_STACK / 2 - 1) {
-        // printf("Heap overflow\n");
+        printf("b_c Heap overflow\n");
         exit(1);
     }
     b_c_stack[--b_c_heapTop] = label;
-    // printf("label %s moved to %d\n", label, b_c_heapTop);
+    if (debugMode == 1) printf("label %s moved to b_c_heap [%d]\n", label, b_c_heapTop);
 }
 char* b_c_popStored(int getEnd) {
     if (getEnd == 1) {
         if (b_c_heapTop >= MAX_STACK) {
-            // printf("Heap underflow\n");
+            printf("b_c Heap underflow\n");
             exit(1);
         }
-        // printf("get element from slot %d\n", b_c_heapTop);
+        if (debugMode == 1) printf("get element from slot %d\n", b_c_heapTop);
         return b_c_stack[b_c_heapTop++];
     } else {
         if (b_c_bot < 0) {
-            // printf("Stack underflow\n");
+            printf("Stack underflow\n");
             exit(1);
         }
-        // printf("get element from slot %d\n", b_c_bot);
+        if (debugMode == 1) printf("get element from slot %d\n", b_c_bot);
         return b_c_stack[b_c_bot--];
     }
 }
@@ -61,15 +61,15 @@ void storeStartToStack(char *label) {
         exit(1);
     }
     storedStack[++bot] = label;
-    printf("label %s moved to %d\n", label, bot);
+    if (debugMode == 1) printf("label %s moved to %d\n", label, bot);
 }
 void storeEndToHeap(char *label) {
     if (heapTop <= MAX_STACK / 2 - 1) {
-        printf("Heap overflow\n");
+        if (debugMode == 1) printf("Heap overflow\n");
         exit(1);
     }
     storedStack[--heapTop] = label;
-    printf("label %s moved to %d\n", label, heapTop);
+    if (debugMode == 1) printf("label %s moved to %d\n", label, heapTop);
 }
 char* popStored(int getEnd) {
     if (getEnd == 1) {
@@ -77,14 +77,14 @@ char* popStored(int getEnd) {
             printf("Heap underflow\n");
             exit(1);
         }
-        printf("get element from slot %d\n", heapTop);
+        if (debugMode == 1) printf("get element from slot %d\n", heapTop);
         return storedStack[heapTop++];
     } else {
         if (bot < 0) {
             printf("Stack underflow\n");
             exit(1);
         }
-        printf("get element from slot %d\n", bot);
+        if (debugMode == 1) printf("get element from slot %d\n", bot);
         return storedStack[bot--];
     }
 }
@@ -280,35 +280,43 @@ statement
     | switchstatement
     ;
 switchstatement
-    : SWITCH LP ID RP {
+    : SWITCH LP E RP {
         char *Lend = newLabel();
-        storeEndToHeap(Lend);
         storeBreakToHeap(Lend);
-        emit("push %s\n", $3);
-        free($3);
-    } LCB caselist optdefault RCB {
+        emit("pop _switch_temp\n");
+    } LCB switchbody RCB {
         char *Lend = b_c_popStored(1);
         emit("%s:\n", Lend);
     }
     ;
+switchbody
+    : caselist optdefault
+    | caselist
+    ;
 caselist
-    : caselist caseclause
-    | caseclause
+    : caselist caseclause 
+    | 
     ;
 caseclause
     : CASE NUMBER COLON {
-        char *Lcase = newLabel();
+        char *Lnext = newLabel();
+        emit("push _switch_temp\n");
         emit("push %d\n", $2);
         emit("EQ?\n");
-        emit("jz %s\n", Lcase);
-        emit("%s:\n", Lcase);
-    } statementlist 
+        emit("jnz %s\n", Lnext);
+        storeStartToStack(Lnext);
+    } statementlist {
+        char *Lnext = popStored(0);
+        emit("%s:\n", Lnext);
+    }
     ;
 optdefault
-    : DEFAULT COLON {
+    : DEFAULT COLON statementlist {
         char *Ldefault = newLabel();
-        emit("%s:\n", Ldefault);
-    } statementlist
+        emit("jmp %s\n", Ldefault);
+        emit("%s\n", Ldefault);
+    }
+    | /* empty */
     ;
 E
     : E ADD E { emit("add\n"); }
