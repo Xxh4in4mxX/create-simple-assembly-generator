@@ -1,4 +1,6 @@
-State 27 conflicts: 1 shift/reduce
+Terminals which are not used
+
+   FLOAT
 
 
 Grammar
@@ -23,641 +25,1281 @@ Grammar
 
    12 @1: /* empty */
 
-   13 ifstatement: IF compareop statement ELSE @1 statement
-   14            | IF compareop statement
+   13 ifheader: IF @1 compareop
+
+   14 ifstatement: ifheader statement
 
    15 @2: /* empty */
 
-   16 whilestatement: DO @2 statement WHILE compareop
+   16 ifstatement: ifheader statement ELSE @2 statement
 
    17 @3: /* empty */
 
    18 whilestatement: WHILE @3 compareop statement
 
-   19 assignstatement: ID ASSIGN E SC
+   19 @4: /* empty */
 
-   20 statement: assignstatement
-   21          | ifstatement
-   22          | whilestatement
-   23          | block
+   20 whilestatement: DO @4 statement WHILE compareop SC
 
-   24 E: E ADD E
-   25  | E SUB E
-   26  | E MUL E
-   27  | E DIV E
-   28  | NUMBER
-   29  | ID
+   21 forassign: ID ASSIGN E
+
+   22 forstmts: forassign
+
+   23 forstmtslist: forstmts CM forstmtslist
+   24             | forstmts
+
+   25 @5: /* empty */
+
+   26 @6: /* empty */
+
+   27 forstatement: FOR LP assignstatement @5 conditionE @6 SC forstmtslist RP statement
+
+   28 assignstatement: ID ASSIGN E SC
+
+   29 continuestatement: CONTINUE SC
+
+   30 breakstatement: BREAK SC
+
+   31 statement: assignstatement
+   32          | ifstatement
+   33          | whilestatement
+   34          | block
+   35          | forstatement
+   36          | breakstatement
+   37          | continuestatement
+   38          | switchstatement
+
+   39 @7: /* empty */
+
+   40 switchstatement: SWITCH LP ID RP @7 LCB caselist optdefault RCB
+
+   41 caselist: caselist caseclause
+   42         | caseclause
+
+   43 @8: /* empty */
+
+   44 caseclause: CASE NUMBER COLON @8 statementlist
+
+   45 @9: /* empty */
+
+   46 optdefault: DEFAULT COLON @9 statementlist
+
+   47 E: E ADD E
+   48  | E SUB E
+   49  | E MUL E
+   50  | E DIV E
+   51  | NUMBER
+   52  | ID
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-ID (258) 19 29
-NUMBER (259) 28
-LP (260) 11
-RP (261) 11
-LCB (262) 3
-RCB (263) 3
-ADD (264) 24
-SUB (265) 25
-DIV (266) 27
-MUL (267) 26
-GT (268) 5
-LT (269) 6
-GE (270) 7
-LE (271) 8
-EQ (272) 9
-UE (273) 10
-DO (274) 16
-IF (275) 13 14
-ELSE (276) 13
-WHILE (277) 16 18
-ASSIGN (278) 19
-SC (279) 19
+ID (258) 21 28 40 52
+NUMBER (259) 44 51
+FLOAT (260)
+GT (261) 5
+LT (262) 6
+GE (263) 7
+LE (264) 8
+EQ (265) 9
+UE (266) 10
+DO (267) 20
+IF (268) 13
+WHILE (269) 18 20
+FOR (270) 27
+CONTINUE (271) 29
+BREAK (272) 30
+SWITCH (273) 40
+CASE (274) 44
+DEFAULT (275) 46
+COLON (276) 44 46
+LOWER_THAN_ELSE (277)
+ELSE (278) 16
+LP (279) 11 27 40
+RP (280) 11 27 40
+LCB (281) 3 40
+RCB (282) 3 40
+CM (283) 23
+ADD (284) 47
+SUB (285) 48
+MUL (286) 49
+DIV (287) 50
+ASSIGN (288) 21 28
+SC (289) 20 27 28 29 30
 
 
 Nonterminals, with rules where they appear
 
-$accept (25)
+$accept (35)
     on left: 0
-statementlist (26)
-    on left: 1 2, on right: 0 1 3
-block (27)
-    on left: 3, on right: 23
-conditionE (28)
-    on left: 4, on right: 11
-relop (29)
+statementlist (36)
+    on left: 1 2, on right: 0 1 3 44 46
+block (37)
+    on left: 3, on right: 34
+conditionE (38)
+    on left: 4, on right: 11 27
+relop (39)
     on left: 5 6 7 8 9 10, on right: 4
-compareop (30)
-    on left: 11, on right: 13 14 16 18
-ifstatement (31)
-    on left: 13 14, on right: 21
-@1 (32)
+compareop (40)
+    on left: 11, on right: 13 18 20
+ifheader (41)
+    on left: 13, on right: 14 16
+@1 (42)
     on left: 12, on right: 13
-whilestatement (33)
-    on left: 16 18, on right: 22
-@2 (34)
+ifstatement (43)
+    on left: 14 16, on right: 32
+@2 (44)
     on left: 15, on right: 16
-@3 (35)
+whilestatement (45)
+    on left: 18 20, on right: 33
+@3 (46)
     on left: 17, on right: 18
-assignstatement (36)
+@4 (47)
     on left: 19, on right: 20
-statement (37)
-    on left: 20 21 22 23, on right: 1 2 13 14 16 18
-E (38)
-    on left: 24 25 26 27 28 29, on right: 4 19 24 25 26 27
+forassign (48)
+    on left: 21, on right: 22
+forstmts (49)
+    on left: 22, on right: 23 24
+forstmtslist (50)
+    on left: 23 24, on right: 23 27
+forstatement (51)
+    on left: 27, on right: 35
+@5 (52)
+    on left: 25, on right: 27
+@6 (53)
+    on left: 26, on right: 27
+assignstatement (54)
+    on left: 28, on right: 27 31
+continuestatement (55)
+    on left: 29, on right: 37
+breakstatement (56)
+    on left: 30, on right: 36
+statement (57)
+    on left: 31 32 33 34 35 36 37 38, on right: 1 2 14 16 18 20 27
+switchstatement (58)
+    on left: 40, on right: 38
+@7 (59)
+    on left: 39, on right: 40
+caselist (60)
+    on left: 41 42, on right: 40 41
+caseclause (61)
+    on left: 44, on right: 41 42
+@8 (62)
+    on left: 43, on right: 44
+optdefault (63)
+    on left: 46, on right: 40
+@9 (64)
+    on left: 45, on right: 46
+E (65)
+    on left: 47 48 49 50 51 52, on right: 4 21 28 47 48 49 50
 
 
 state 0
 
     0 $accept: . statementlist $end
 
-    ID     shift, and go to state 1
-    LCB    shift, and go to state 2
-    DO     shift, and go to state 3
-    IF     shift, and go to state 4
-    WHILE  shift, and go to state 5
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
 
-    statementlist    go to state 6
-    block            go to state 7
-    ifstatement      go to state 8
-    whilestatement   go to state 9
-    assignstatement  go to state 10
-    statement        go to state 11
+    statementlist      go to state 10
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 19
+    switchstatement    go to state 20
 
 
 state 1
 
-   19 assignstatement: ID . ASSIGN E SC
+   28 assignstatement: ID . ASSIGN E SC
 
-    ASSIGN  shift, and go to state 12
+    ASSIGN  shift, and go to state 21
 
 
 state 2
 
-    3 block: LCB . statementlist RCB
+   20 whilestatement: DO . @4 statement WHILE compareop SC
 
-    ID     shift, and go to state 1
-    LCB    shift, and go to state 2
-    DO     shift, and go to state 3
-    IF     shift, and go to state 4
-    WHILE  shift, and go to state 5
+    $default  reduce using rule 19 (@4)
 
-    statementlist    go to state 13
-    block            go to state 7
-    ifstatement      go to state 8
-    whilestatement   go to state 9
-    assignstatement  go to state 10
-    statement        go to state 11
+    @4  go to state 22
 
 
 state 3
 
-   16 whilestatement: DO . @2 statement WHILE compareop
+   13 ifheader: IF . @1 compareop
 
-    $default  reduce using rule 15 (@2)
+    $default  reduce using rule 12 (@1)
 
-    @2  go to state 14
+    @1  go to state 23
 
 
 state 4
-
-   13 ifstatement: IF . compareop statement ELSE @1 statement
-   14            | IF . compareop statement
-
-    LP  shift, and go to state 15
-
-    compareop  go to state 16
-
-
-state 5
 
    18 whilestatement: WHILE . @3 compareop statement
 
     $default  reduce using rule 17 (@3)
 
-    @3  go to state 17
+    @3  go to state 24
+
+
+state 5
+
+   27 forstatement: FOR . LP assignstatement @5 conditionE @6 SC forstmtslist RP statement
+
+    LP  shift, and go to state 25
 
 
 state 6
 
-    0 $accept: statementlist . $end
-    1 statementlist: statementlist . statement
+   29 continuestatement: CONTINUE . SC
 
-    $end   shift, and go to state 18
-    ID     shift, and go to state 1
-    LCB    shift, and go to state 2
-    DO     shift, and go to state 3
-    IF     shift, and go to state 4
-    WHILE  shift, and go to state 5
-
-    block            go to state 7
-    ifstatement      go to state 8
-    whilestatement   go to state 9
-    assignstatement  go to state 10
-    statement        go to state 19
+    SC  shift, and go to state 26
 
 
 state 7
 
-   23 statement: block .
+   30 breakstatement: BREAK . SC
 
-    $default  reduce using rule 23 (statement)
+    SC  shift, and go to state 27
 
 
 state 8
 
-   21 statement: ifstatement .
+   40 switchstatement: SWITCH . LP ID RP @7 LCB caselist optdefault RCB
 
-    $default  reduce using rule 21 (statement)
+    LP  shift, and go to state 28
 
 
 state 9
 
-   22 statement: whilestatement .
+    3 block: LCB . statementlist RCB
 
-    $default  reduce using rule 22 (statement)
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    statementlist      go to state 29
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 19
+    switchstatement    go to state 20
 
 
 state 10
 
-   20 statement: assignstatement .
+    0 $accept: statementlist . $end
+    1 statementlist: statementlist . statement
 
-    $default  reduce using rule 20 (statement)
+    $end      shift, and go to state 30
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 31
+    switchstatement    go to state 20
 
 
 state 11
+
+   34 statement: block .
+
+    $default  reduce using rule 34 (statement)
+
+
+state 12
+
+   14 ifstatement: ifheader . statement
+   16            | ifheader . statement ELSE @2 statement
+
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 32
+    switchstatement    go to state 20
+
+
+state 13
+
+   32 statement: ifstatement .
+
+    $default  reduce using rule 32 (statement)
+
+
+state 14
+
+   33 statement: whilestatement .
+
+    $default  reduce using rule 33 (statement)
+
+
+state 15
+
+   35 statement: forstatement .
+
+    $default  reduce using rule 35 (statement)
+
+
+state 16
+
+   31 statement: assignstatement .
+
+    $default  reduce using rule 31 (statement)
+
+
+state 17
+
+   37 statement: continuestatement .
+
+    $default  reduce using rule 37 (statement)
+
+
+state 18
+
+   36 statement: breakstatement .
+
+    $default  reduce using rule 36 (statement)
+
+
+state 19
 
     2 statementlist: statement .
 
     $default  reduce using rule 2 (statementlist)
 
 
-state 12
+state 20
 
-   19 assignstatement: ID ASSIGN . E SC
+   38 statement: switchstatement .
 
-    ID      shift, and go to state 20
-    NUMBER  shift, and go to state 21
-
-    E  go to state 22
+    $default  reduce using rule 38 (statement)
 
 
-state 13
+state 21
+
+   28 assignstatement: ID ASSIGN . E SC
+
+    ID      shift, and go to state 33
+    NUMBER  shift, and go to state 34
+
+    E  go to state 35
+
+
+state 22
+
+   20 whilestatement: DO @4 . statement WHILE compareop SC
+
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 36
+    switchstatement    go to state 20
+
+
+state 23
+
+   13 ifheader: IF @1 . compareop
+
+    LP  shift, and go to state 37
+
+    compareop  go to state 38
+
+
+state 24
+
+   18 whilestatement: WHILE @3 . compareop statement
+
+    LP  shift, and go to state 37
+
+    compareop  go to state 39
+
+
+state 25
+
+   27 forstatement: FOR LP . assignstatement @5 conditionE @6 SC forstmtslist RP statement
+
+    ID  shift, and go to state 1
+
+    assignstatement  go to state 40
+
+
+state 26
+
+   29 continuestatement: CONTINUE SC .
+
+    $default  reduce using rule 29 (continuestatement)
+
+
+state 27
+
+   30 breakstatement: BREAK SC .
+
+    $default  reduce using rule 30 (breakstatement)
+
+
+state 28
+
+   40 switchstatement: SWITCH LP . ID RP @7 LCB caselist optdefault RCB
+
+    ID  shift, and go to state 41
+
+
+state 29
 
     1 statementlist: statementlist . statement
     3 block: LCB statementlist . RCB
 
-    ID     shift, and go to state 1
-    LCB    shift, and go to state 2
-    RCB    shift, and go to state 23
-    DO     shift, and go to state 3
-    IF     shift, and go to state 4
-    WHILE  shift, and go to state 5
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+    RCB       shift, and go to state 42
 
-    block            go to state 7
-    ifstatement      go to state 8
-    whilestatement   go to state 9
-    assignstatement  go to state 10
-    statement        go to state 19
-
-
-state 14
-
-   16 whilestatement: DO @2 . statement WHILE compareop
-
-    ID     shift, and go to state 1
-    LCB    shift, and go to state 2
-    DO     shift, and go to state 3
-    IF     shift, and go to state 4
-    WHILE  shift, and go to state 5
-
-    block            go to state 7
-    ifstatement      go to state 8
-    whilestatement   go to state 9
-    assignstatement  go to state 10
-    statement        go to state 24
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 31
+    switchstatement    go to state 20
 
 
-state 15
-
-   11 compareop: LP . conditionE RP
-
-    ID      shift, and go to state 20
-    NUMBER  shift, and go to state 21
-
-    conditionE  go to state 25
-    E           go to state 26
-
-
-state 16
-
-   13 ifstatement: IF compareop . statement ELSE @1 statement
-   14            | IF compareop . statement
-
-    ID     shift, and go to state 1
-    LCB    shift, and go to state 2
-    DO     shift, and go to state 3
-    IF     shift, and go to state 4
-    WHILE  shift, and go to state 5
-
-    block            go to state 7
-    ifstatement      go to state 8
-    whilestatement   go to state 9
-    assignstatement  go to state 10
-    statement        go to state 27
-
-
-state 17
-
-   18 whilestatement: WHILE @3 . compareop statement
-
-    LP  shift, and go to state 15
-
-    compareop  go to state 28
-
-
-state 18
+state 30
 
     0 $accept: statementlist $end .
 
     $default  accept
 
 
-state 19
+state 31
 
     1 statementlist: statementlist statement .
 
     $default  reduce using rule 1 (statementlist)
 
 
-state 20
+state 32
 
-   29 E: ID .
+   14 ifstatement: ifheader statement .
+   16            | ifheader statement . ELSE @2 statement
 
-    $default  reduce using rule 29 (E)
+    ELSE  shift, and go to state 43
 
-
-state 21
-
-   28 E: NUMBER .
-
-    $default  reduce using rule 28 (E)
+    $default  reduce using rule 14 (ifstatement)
 
 
-state 22
+state 33
 
-   19 assignstatement: ID ASSIGN E . SC
-   24 E: E . ADD E
-   25  | E . SUB E
-   26  | E . MUL E
-   27  | E . DIV E
+   52 E: ID .
 
-    ADD  shift, and go to state 29
-    SUB  shift, and go to state 30
-    DIV  shift, and go to state 31
-    MUL  shift, and go to state 32
-    SC   shift, and go to state 33
+    $default  reduce using rule 52 (E)
 
 
-state 23
+state 34
+
+   51 E: NUMBER .
+
+    $default  reduce using rule 51 (E)
+
+
+state 35
+
+   28 assignstatement: ID ASSIGN E . SC
+   47 E: E . ADD E
+   48  | E . SUB E
+   49  | E . MUL E
+   50  | E . DIV E
+
+    ADD  shift, and go to state 44
+    SUB  shift, and go to state 45
+    MUL  shift, and go to state 46
+    DIV  shift, and go to state 47
+    SC   shift, and go to state 48
+
+
+state 36
+
+   20 whilestatement: DO @4 statement . WHILE compareop SC
+
+    WHILE  shift, and go to state 49
+
+
+state 37
+
+   11 compareop: LP . conditionE RP
+
+    ID      shift, and go to state 33
+    NUMBER  shift, and go to state 34
+
+    conditionE  go to state 50
+    E           go to state 51
+
+
+state 38
+
+   13 ifheader: IF @1 compareop .
+
+    $default  reduce using rule 13 (ifheader)
+
+
+state 39
+
+   18 whilestatement: WHILE @3 compareop . statement
+
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 52
+    switchstatement    go to state 20
+
+
+state 40
+
+   27 forstatement: FOR LP assignstatement . @5 conditionE @6 SC forstmtslist RP statement
+
+    $default  reduce using rule 25 (@5)
+
+    @5  go to state 53
+
+
+state 41
+
+   40 switchstatement: SWITCH LP ID . RP @7 LCB caselist optdefault RCB
+
+    RP  shift, and go to state 54
+
+
+state 42
 
     3 block: LCB statementlist RCB .
 
     $default  reduce using rule 3 (block)
 
 
-state 24
-
-   16 whilestatement: DO @2 statement . WHILE compareop
-
-    WHILE  shift, and go to state 34
-
-
-state 25
-
-   11 compareop: LP conditionE . RP
-
-    RP  shift, and go to state 35
-
-
-state 26
-
-    4 conditionE: E . relop E
-   24 E: E . ADD E
-   25  | E . SUB E
-   26  | E . MUL E
-   27  | E . DIV E
-
-    ADD  shift, and go to state 29
-    SUB  shift, and go to state 30
-    DIV  shift, and go to state 31
-    MUL  shift, and go to state 32
-    GT   shift, and go to state 36
-    LT   shift, and go to state 37
-    GE   shift, and go to state 38
-    LE   shift, and go to state 39
-    EQ   shift, and go to state 40
-    UE   shift, and go to state 41
-
-    relop  go to state 42
-
-
-state 27
-
-   13 ifstatement: IF compareop statement . ELSE @1 statement
-   14            | IF compareop statement .
-
-    ELSE  shift, and go to state 43
-
-    ELSE      [reduce using rule 14 (ifstatement)]
-    $default  reduce using rule 14 (ifstatement)
-
-
-state 28
-
-   18 whilestatement: WHILE @3 compareop . statement
-
-    ID     shift, and go to state 1
-    LCB    shift, and go to state 2
-    DO     shift, and go to state 3
-    IF     shift, and go to state 4
-    WHILE  shift, and go to state 5
-
-    block            go to state 7
-    ifstatement      go to state 8
-    whilestatement   go to state 9
-    assignstatement  go to state 10
-    statement        go to state 44
-
-
-state 29
-
-   24 E: E ADD . E
-
-    ID      shift, and go to state 20
-    NUMBER  shift, and go to state 21
-
-    E  go to state 45
-
-
-state 30
-
-   25 E: E SUB . E
-
-    ID      shift, and go to state 20
-    NUMBER  shift, and go to state 21
-
-    E  go to state 46
-
-
-state 31
-
-   27 E: E DIV . E
-
-    ID      shift, and go to state 20
-    NUMBER  shift, and go to state 21
-
-    E  go to state 47
-
-
-state 32
-
-   26 E: E MUL . E
-
-    ID      shift, and go to state 20
-    NUMBER  shift, and go to state 21
-
-    E  go to state 48
-
-
-state 33
-
-   19 assignstatement: ID ASSIGN E SC .
-
-    $default  reduce using rule 19 (assignstatement)
-
-
-state 34
-
-   16 whilestatement: DO @2 statement WHILE . compareop
-
-    LP  shift, and go to state 15
-
-    compareop  go to state 49
-
-
-state 35
-
-   11 compareop: LP conditionE RP .
-
-    $default  reduce using rule 11 (compareop)
-
-
-state 36
-
-    5 relop: GT .
-
-    $default  reduce using rule 5 (relop)
-
-
-state 37
-
-    6 relop: LT .
-
-    $default  reduce using rule 6 (relop)
-
-
-state 38
-
-    7 relop: GE .
-
-    $default  reduce using rule 7 (relop)
-
-
-state 39
-
-    8 relop: LE .
-
-    $default  reduce using rule 8 (relop)
-
-
-state 40
-
-    9 relop: EQ .
-
-    $default  reduce using rule 9 (relop)
-
-
-state 41
-
-   10 relop: UE .
-
-    $default  reduce using rule 10 (relop)
-
-
-state 42
-
-    4 conditionE: E relop . E
-
-    ID      shift, and go to state 20
-    NUMBER  shift, and go to state 21
-
-    E  go to state 50
-
-
 state 43
 
-   13 ifstatement: IF compareop statement ELSE . @1 statement
+   16 ifstatement: ifheader statement ELSE . @2 statement
 
-    $default  reduce using rule 12 (@1)
+    $default  reduce using rule 15 (@2)
 
-    @1  go to state 51
+    @2  go to state 55
 
 
 state 44
+
+   47 E: E ADD . E
+
+    ID      shift, and go to state 33
+    NUMBER  shift, and go to state 34
+
+    E  go to state 56
+
+
+state 45
+
+   48 E: E SUB . E
+
+    ID      shift, and go to state 33
+    NUMBER  shift, and go to state 34
+
+    E  go to state 57
+
+
+state 46
+
+   49 E: E MUL . E
+
+    ID      shift, and go to state 33
+    NUMBER  shift, and go to state 34
+
+    E  go to state 58
+
+
+state 47
+
+   50 E: E DIV . E
+
+    ID      shift, and go to state 33
+    NUMBER  shift, and go to state 34
+
+    E  go to state 59
+
+
+state 48
+
+   28 assignstatement: ID ASSIGN E SC .
+
+    $default  reduce using rule 28 (assignstatement)
+
+
+state 49
+
+   20 whilestatement: DO @4 statement WHILE . compareop SC
+
+    LP  shift, and go to state 37
+
+    compareop  go to state 60
+
+
+state 50
+
+   11 compareop: LP conditionE . RP
+
+    RP  shift, and go to state 61
+
+
+state 51
+
+    4 conditionE: E . relop E
+   47 E: E . ADD E
+   48  | E . SUB E
+   49  | E . MUL E
+   50  | E . DIV E
+
+    GT   shift, and go to state 62
+    LT   shift, and go to state 63
+    GE   shift, and go to state 64
+    LE   shift, and go to state 65
+    EQ   shift, and go to state 66
+    UE   shift, and go to state 67
+    ADD  shift, and go to state 44
+    SUB  shift, and go to state 45
+    MUL  shift, and go to state 46
+    DIV  shift, and go to state 47
+
+    relop  go to state 68
+
+
+state 52
 
    18 whilestatement: WHILE @3 compareop statement .
 
     $default  reduce using rule 18 (whilestatement)
 
 
-state 45
+state 53
 
-   24 E: E . ADD E
-   24  | E ADD E .
-   25  | E . SUB E
-   26  | E . MUL E
-   27  | E . DIV E
+   27 forstatement: FOR LP assignstatement @5 . conditionE @6 SC forstmtslist RP statement
 
-    SUB  shift, and go to state 30
-    DIV  shift, and go to state 31
-    MUL  shift, and go to state 32
+    ID      shift, and go to state 33
+    NUMBER  shift, and go to state 34
 
-    $default  reduce using rule 24 (E)
+    conditionE  go to state 69
+    E           go to state 51
 
 
-state 46
+state 54
 
-   24 E: E . ADD E
-   25  | E . SUB E
-   25  | E SUB E .
-   26  | E . MUL E
-   27  | E . DIV E
+   40 switchstatement: SWITCH LP ID RP . @7 LCB caselist optdefault RCB
 
-    DIV  shift, and go to state 31
-    MUL  shift, and go to state 32
+    $default  reduce using rule 39 (@7)
 
-    $default  reduce using rule 25 (E)
+    @7  go to state 70
 
 
-state 47
+state 55
 
-   24 E: E . ADD E
-   25  | E . SUB E
-   26  | E . MUL E
-   27  | E . DIV E
-   27  | E DIV E .
+   16 ifstatement: ifheader statement ELSE @2 . statement
 
-    MUL  shift, and go to state 32
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
 
-    $default  reduce using rule 27 (E)
-
-
-state 48
-
-   24 E: E . ADD E
-   25  | E . SUB E
-   26  | E . MUL E
-   26  | E MUL E .
-   27  | E . DIV E
-
-    $default  reduce using rule 26 (E)
-
-
-state 49
-
-   16 whilestatement: DO @2 statement WHILE compareop .
-
-    $default  reduce using rule 16 (whilestatement)
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 71
+    switchstatement    go to state 20
 
 
-state 50
+state 56
+
+   47 E: E . ADD E
+   47  | E ADD E .
+   48  | E . SUB E
+   49  | E . MUL E
+   50  | E . DIV E
+
+    MUL  shift, and go to state 46
+    DIV  shift, and go to state 47
+
+    $default  reduce using rule 47 (E)
+
+
+state 57
+
+   47 E: E . ADD E
+   48  | E . SUB E
+   48  | E SUB E .
+   49  | E . MUL E
+   50  | E . DIV E
+
+    MUL  shift, and go to state 46
+    DIV  shift, and go to state 47
+
+    $default  reduce using rule 48 (E)
+
+
+state 58
+
+   47 E: E . ADD E
+   48  | E . SUB E
+   49  | E . MUL E
+   49  | E MUL E .
+   50  | E . DIV E
+
+    $default  reduce using rule 49 (E)
+
+
+state 59
+
+   47 E: E . ADD E
+   48  | E . SUB E
+   49  | E . MUL E
+   50  | E . DIV E
+   50  | E DIV E .
+
+    $default  reduce using rule 50 (E)
+
+
+state 60
+
+   20 whilestatement: DO @4 statement WHILE compareop . SC
+
+    SC  shift, and go to state 72
+
+
+state 61
+
+   11 compareop: LP conditionE RP .
+
+    $default  reduce using rule 11 (compareop)
+
+
+state 62
+
+    5 relop: GT .
+
+    $default  reduce using rule 5 (relop)
+
+
+state 63
+
+    6 relop: LT .
+
+    $default  reduce using rule 6 (relop)
+
+
+state 64
+
+    7 relop: GE .
+
+    $default  reduce using rule 7 (relop)
+
+
+state 65
+
+    8 relop: LE .
+
+    $default  reduce using rule 8 (relop)
+
+
+state 66
+
+    9 relop: EQ .
+
+    $default  reduce using rule 9 (relop)
+
+
+state 67
+
+   10 relop: UE .
+
+    $default  reduce using rule 10 (relop)
+
+
+state 68
+
+    4 conditionE: E relop . E
+
+    ID      shift, and go to state 33
+    NUMBER  shift, and go to state 34
+
+    E  go to state 73
+
+
+state 69
+
+   27 forstatement: FOR LP assignstatement @5 conditionE . @6 SC forstmtslist RP statement
+
+    $default  reduce using rule 26 (@6)
+
+    @6  go to state 74
+
+
+state 70
+
+   40 switchstatement: SWITCH LP ID RP @7 . LCB caselist optdefault RCB
+
+    LCB  shift, and go to state 75
+
+
+state 71
+
+   16 ifstatement: ifheader statement ELSE @2 statement .
+
+    $default  reduce using rule 16 (ifstatement)
+
+
+state 72
+
+   20 whilestatement: DO @4 statement WHILE compareop SC .
+
+    $default  reduce using rule 20 (whilestatement)
+
+
+state 73
 
     4 conditionE: E relop E .
-   24 E: E . ADD E
-   25  | E . SUB E
-   26  | E . MUL E
-   27  | E . DIV E
+   47 E: E . ADD E
+   48  | E . SUB E
+   49  | E . MUL E
+   50  | E . DIV E
 
-    ADD  shift, and go to state 29
-    SUB  shift, and go to state 30
-    DIV  shift, and go to state 31
-    MUL  shift, and go to state 32
+    ADD  shift, and go to state 44
+    SUB  shift, and go to state 45
+    MUL  shift, and go to state 46
+    DIV  shift, and go to state 47
 
     $default  reduce using rule 4 (conditionE)
 
 
-state 51
+state 74
 
-   13 ifstatement: IF compareop statement ELSE @1 . statement
+   27 forstatement: FOR LP assignstatement @5 conditionE @6 . SC forstmtslist RP statement
 
-    ID     shift, and go to state 1
-    LCB    shift, and go to state 2
-    DO     shift, and go to state 3
-    IF     shift, and go to state 4
-    WHILE  shift, and go to state 5
-
-    block            go to state 7
-    ifstatement      go to state 8
-    whilestatement   go to state 9
-    assignstatement  go to state 10
-    statement        go to state 52
+    SC  shift, and go to state 76
 
 
-state 52
+state 75
 
-   13 ifstatement: IF compareop statement ELSE @1 statement .
+   40 switchstatement: SWITCH LP ID RP @7 LCB . caselist optdefault RCB
 
-    $default  reduce using rule 13 (ifstatement)
+    CASE  shift, and go to state 77
+
+    caselist    go to state 78
+    caseclause  go to state 79
+
+
+state 76
+
+   27 forstatement: FOR LP assignstatement @5 conditionE @6 SC . forstmtslist RP statement
+
+    ID  shift, and go to state 80
+
+    forassign     go to state 81
+    forstmts      go to state 82
+    forstmtslist  go to state 83
+
+
+state 77
+
+   44 caseclause: CASE . NUMBER COLON @8 statementlist
+
+    NUMBER  shift, and go to state 84
+
+
+state 78
+
+   40 switchstatement: SWITCH LP ID RP @7 LCB caselist . optdefault RCB
+   41 caselist: caselist . caseclause
+
+    CASE     shift, and go to state 77
+    DEFAULT  shift, and go to state 85
+
+    caseclause  go to state 86
+    optdefault  go to state 87
+
+
+state 79
+
+   42 caselist: caseclause .
+
+    $default  reduce using rule 42 (caselist)
+
+
+state 80
+
+   21 forassign: ID . ASSIGN E
+
+    ASSIGN  shift, and go to state 88
+
+
+state 81
+
+   22 forstmts: forassign .
+
+    $default  reduce using rule 22 (forstmts)
+
+
+state 82
+
+   23 forstmtslist: forstmts . CM forstmtslist
+   24             | forstmts .
+
+    CM  shift, and go to state 89
+
+    $default  reduce using rule 24 (forstmtslist)
+
+
+state 83
+
+   27 forstatement: FOR LP assignstatement @5 conditionE @6 SC forstmtslist . RP statement
+
+    RP  shift, and go to state 90
+
+
+state 84
+
+   44 caseclause: CASE NUMBER . COLON @8 statementlist
+
+    COLON  shift, and go to state 91
+
+
+state 85
+
+   46 optdefault: DEFAULT . COLON @9 statementlist
+
+    COLON  shift, and go to state 92
+
+
+state 86
+
+   41 caselist: caselist caseclause .
+
+    $default  reduce using rule 41 (caselist)
+
+
+state 87
+
+   40 switchstatement: SWITCH LP ID RP @7 LCB caselist optdefault . RCB
+
+    RCB  shift, and go to state 93
+
+
+state 88
+
+   21 forassign: ID ASSIGN . E
+
+    ID      shift, and go to state 33
+    NUMBER  shift, and go to state 34
+
+    E  go to state 94
+
+
+state 89
+
+   23 forstmtslist: forstmts CM . forstmtslist
+
+    ID  shift, and go to state 80
+
+    forassign     go to state 81
+    forstmts      go to state 82
+    forstmtslist  go to state 95
+
+
+state 90
+
+   27 forstatement: FOR LP assignstatement @5 conditionE @6 SC forstmtslist RP . statement
+
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 96
+    switchstatement    go to state 20
+
+
+state 91
+
+   44 caseclause: CASE NUMBER COLON . @8 statementlist
+
+    $default  reduce using rule 43 (@8)
+
+    @8  go to state 97
+
+
+state 92
+
+   46 optdefault: DEFAULT COLON . @9 statementlist
+
+    $default  reduce using rule 45 (@9)
+
+    @9  go to state 98
+
+
+state 93
+
+   40 switchstatement: SWITCH LP ID RP @7 LCB caselist optdefault RCB .
+
+    $default  reduce using rule 40 (switchstatement)
+
+
+state 94
+
+   21 forassign: ID ASSIGN E .
+   47 E: E . ADD E
+   48  | E . SUB E
+   49  | E . MUL E
+   50  | E . DIV E
+
+    ADD  shift, and go to state 44
+    SUB  shift, and go to state 45
+    MUL  shift, and go to state 46
+    DIV  shift, and go to state 47
+
+    $default  reduce using rule 21 (forassign)
+
+
+state 95
+
+   23 forstmtslist: forstmts CM forstmtslist .
+
+    $default  reduce using rule 23 (forstmtslist)
+
+
+state 96
+
+   27 forstatement: FOR LP assignstatement @5 conditionE @6 SC forstmtslist RP statement .
+
+    $default  reduce using rule 27 (forstatement)
+
+
+state 97
+
+   44 caseclause: CASE NUMBER COLON @8 . statementlist
+
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    statementlist      go to state 99
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 19
+    switchstatement    go to state 20
+
+
+state 98
+
+   46 optdefault: DEFAULT COLON @9 . statementlist
+
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    statementlist      go to state 100
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 19
+    switchstatement    go to state 20
+
+
+state 99
+
+    1 statementlist: statementlist . statement
+   44 caseclause: CASE NUMBER COLON @8 statementlist .
+
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    $default  reduce using rule 44 (caseclause)
+
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 31
+    switchstatement    go to state 20
+
+
+state 100
+
+    1 statementlist: statementlist . statement
+   46 optdefault: DEFAULT COLON @9 statementlist .
+
+    ID        shift, and go to state 1
+    DO        shift, and go to state 2
+    IF        shift, and go to state 3
+    WHILE     shift, and go to state 4
+    FOR       shift, and go to state 5
+    CONTINUE  shift, and go to state 6
+    BREAK     shift, and go to state 7
+    SWITCH    shift, and go to state 8
+    LCB       shift, and go to state 9
+
+    $default  reduce using rule 46 (optdefault)
+
+    block              go to state 11
+    ifheader           go to state 12
+    ifstatement        go to state 13
+    whilestatement     go to state 14
+    forstatement       go to state 15
+    assignstatement    go to state 16
+    continuestatement  go to state 17
+    breakstatement     go to state 18
+    statement          go to state 31
+    switchstatement    go to state 20

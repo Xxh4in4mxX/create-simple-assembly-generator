@@ -1,21 +1,23 @@
-x1 = 1000;
-if (x > 100)
+x = 10.50;
+switch (x)
 {
-    y = 15;
-    z = 12;
-    if (y > 10) {
-        k = 100;
-        c = 5;
-    } else {
-        k = 19;
-        b = 10;
+case 1:
+    x = x + 1;
+    
+case 2:
+    x = x + 2;
+    break;
+default:
+    break;
+}
+
+while (x != 0) {
+    x = x + 1;
+}
+
+for (i = 0; i < 10; i = i + 1) {
+    x = x + 2;
+    if (x > 3) {
+        break;
     }
 }
-while (x < 0) {
-    y = y + 1;
-}
-
-do {
-    y = y + 1;
-} while (x > 0);
-

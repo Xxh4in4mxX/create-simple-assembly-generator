@@ -174,7 +174,7 @@ relop
 compareop
     : LP conditionE RP  {
           char *L = peekHeap();
-          emit("jnz %s\n", L);
+          emit("jnz %s:\n", L);
       }
     ;
 ifheader
@@ -189,10 +189,10 @@ ifstatement
           char *Lend = popStored(1);
           emit("%s:\n", Lend); /* Lelse */
       }
-    | ifheader /* peekHeap(); jnz(Lelse)*/ statement ELSE {
+    | ifheader /* peekHeap(); jnz(Le:lse)*/ statement ELSE {
           char *Lelse = popStored(1);
           char *Lend = newLabel();
-          emit("jmp %s\n", Lend); /* jmp Lend */
+          emit("jmp %s:\n", Lend); /* jmp Le:nd */
           emit("%s:\n", Lelse); /* Lelse: */
           storeEndToHeap(Lend);
       } statement {
@@ -213,7 +213,7 @@ whilestatement
       } compareop statement {
           char *Lbegin = b_c_popStored(0);
           char *Lend = b_c_popStored(1);     /* Lelse */
-          emit("jmp %s\n", Lbegin); /* Lbegin */
+          emit("jmp %s:\n", Lbegin); /* Lbegin */
           emit("%s:\n", Lend);
       }
     | DO {
@@ -227,7 +227,7 @@ whilestatement
       } statement WHILE compareop SC {
           char *Lend = b_c_popStored(1);     /* Lend */
           char *Lbegin = b_c_popStored(0);  /* Lbegin */
-          emit("jmp %s\n", Lbegin); /*jmp Lbegin */
+          emit("jmp %s:\n", Lbegin); /*jmp Lb:egin */
           emit("%s:\n", Lend);
       }
     ;
@@ -252,11 +252,11 @@ forstatement
         storeBreakToHeap(Fend);
     } conditionE {
         char *Fend = peekHeap();
-        emit("jnz %s\n", Fend);
+        emit("jnz %s:\n", Fend);
     } SC forstmtslist RP statement {
         char *Fend = popStored(1);
         char *Fbegin = popStored(0);
-        emit("jmp %s\n", Fbegin);
+        emit("jmp %s:\n", Fbegin);
         emit("%s:\n", Fend);
     };
 
@@ -264,10 +264,10 @@ assignstatement
     : ID ASSIGN E SC { emit("pop %s\n", $1); free($1); }
     ;
 continuestatement
-    : CONTINUE SC {emit("jmp %s\n", b_c_peekStack());}
+    : CONTINUE SC {emit("jmp %s:\n", b_c_peekStack());}
     ;
 breakstatement
-    : BREAK SC {emit("jmp %s\n", b_c_peekHeap());}
+    : BREAK SC {emit("jmp %s:\n", b_c_peekHeap());}
     ;
 statement
     : assignstatement
@@ -303,7 +303,7 @@ caseclause
         emit("push _switch_temp\n");
         emit("push %d\n", $2);
         emit("EQ?\n");
-        emit("jnz %s\n", Lnext);
+        emit("jnz %s:\n", Lnext);
         storeStartToStack(Lnext);
     } statementlist {
         char *Lnext = popStored(0);
@@ -313,10 +313,9 @@ caseclause
 optdefault
     : DEFAULT COLON statementlist {
         char *Ldefault = newLabel();
-        emit("jmp %s\n", Ldefault);
+        emit("jmp %s:\n", Ldefault);
         emit("%s\n", Ldefault);
     }
-    | /* empty */
     ;
 E
     : E ADD E { emit("add\n"); }
@@ -324,6 +323,7 @@ E
     | E MUL E { emit("mul\n"); }
     | E DIV E { emit("div\n"); }
     | NUMBER  { emit("push %d\n", $1); }
+    | FLOAT   { emit("push %.3f\n", $1); }
     | ID      { emit("push %s\n", $1); }
     ;
 %%
